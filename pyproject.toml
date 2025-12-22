@@ -1,0 +1,37 @@
+[project]
+name = "habbit-tracker"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "mrchkn.r",email = "rodionmarochkin32@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django (>=6.0,<7.0)",
+    "djangorestframework (>=3.16.1,<4.0.0)",
+    "djangorestframework-simplejwt (>=5.5.1,<6.0.0)",
+    "black (>=25.12.0,<26.0.0)",
+    "isort (>=7.0.0,<8.0.0)",
+    "redis (>=7.1.0,<8.0.0)",
+    "celery (>=5.6.0,<6.0.0)",
+    "eventlet (>=0.40.4,<0.41.0)",
+    "psycopg2-binary (>=2.9.11,<3.0.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)",
+    "ipython (>=9.8.0,<10.0.0)",
+    "pillow (>=12.0.0,<13.0.0)",
+    "django-filter (>=25.2,<26.0)",
+    "drf-yasg (>=1.21.11,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 119
+exclude = "venv"
+
+[tool.isort]
+line_length = 119
