@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_yasg",
     "habits.apps.HabitsConfig",
-    "telegram_bot.apps.TelegramBotConfig",
+    "telegram_bot",
     "users.apps.UsersConfig",
 ]
 
@@ -173,8 +173,7 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+
 CELERY_TIMEZONE = "Europe/Moscow"
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
@@ -182,8 +181,8 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 60 * 60
 
 CELERY_BEAT_SCHEDULE = {
-    "block-inactive-users-daily": {
-        "task": "materials.tasks.block_inactive_users",
-        "schedule": crontab(hour=0, minute=5),
+    "check-habit-reminders": {
+        "task": "habits.tasks.check_and_send_habit_reminders",
+        "schedule": 30,
     },
 }
