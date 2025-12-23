@@ -19,7 +19,7 @@ class Habit(models.Model):
         limit_choices_to={"is_pleasant": True},
         verbose_name="Связанная привычка",
     )
-    reward = models.CharField(blank=True, null=True, verbose_name="Вознаграждение")
+    reward = models.TextField(blank=True, null=True, verbose_name="Вознаграждение")
     periodicity = models.PositiveIntegerField(
         default=1, validators=[MinValueValidator(1), MaxValueValidator(7)], verbose_name="Периодичность"
     )
