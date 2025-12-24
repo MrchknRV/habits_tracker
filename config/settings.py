@@ -45,9 +45,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_yasg",
-    "habits.apps.HabitsConfig",
-    "telegram_bot",
-    "users.apps.UsersConfig",
+    "habits",
+    "users",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -181,8 +180,10 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 60 * 60
 
 CELERY_BEAT_SCHEDULE = {
-    "check-habit-reminders": {
-        "task": "habits.tasks.check_and_send_habit_reminders",
-        "schedule": 30,
+    "check-reminders": {
+        "task": "habits.tasks.check_and_send_reminders",
+        "schedule": crontab(minute='*'),
     },
 }
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")

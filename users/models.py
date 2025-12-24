@@ -36,7 +36,6 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=17, blank=True, null=True, verbose_name="Телефон")
     country = models.CharField(max_length=100, blank=True, null=True, verbose_name="Страна")
     telegram_chat_id = models.BigIntegerField(unique=True, null=True, blank=True)
-    telegram_token = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
 
     objects = CustomUserManager()
 
