@@ -14,7 +14,7 @@ COPY pyproject.toml poetry.lock ./
 
 RUN pip install "poetry==$POETRY_VERSION" \
 	&& poetry config virtualenvs.create false \
-	&& poetry install --only main
+	&& poetry install --only main --no-root
 
 COPY . .
 
