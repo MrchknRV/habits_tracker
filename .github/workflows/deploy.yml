@@ -1,70 +1,70 @@
-#name: CI/CD to Yandex Cloud
-#
-#on: [push]
-#
-#jobs:
-#  test:
-#    runs-on: ubuntu-latest
-#    env:
-#      SECRET_KEY: "temporary-secret-key-for-tests-only-1234567890"
-#      DEBUG: "True"
-#      DATABASE_NAME: "test_db"
-#      DATABASE_USER: "test_user"
-#      DATABASE_PASSWORD: "test_pass"
-#      DATABASE_HOST: "localhost"
-#      DATABASE_PORT: "5432"
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Set up Python
-#        uses: actions/setup-python@v5
-#        with:
-#          python-version: '3.12'
-#
-#      - name: Install Poetry
-#        run: curl -sSL https://install.python-poetry.org | python3 -
-#
-#      - name: Install dependencies
-#        run: poetry install --only main --no-root
-#
-#      - name: Run tests
-#        run: poetry run python manage.py test
-#        env:
-#          SECRET_KEY: "temporary-secret-key-for-tests-123456789"
-#          DEBUG: "True"
-#
-#  deploy:
-#    needs: test
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Deploy to server
-#        env:
-#          SERVER_IP: ${{ secrets.SERVER_IP }}
-#          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-#          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-#          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-#        run: |
-#          echo "$SSH_PRIVATE_KEY" > key.pem
-#          chmod 600 key.pem
-#
-#          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$SERVER_IP << 'EOF'
-#          cd ~/habits-tracker || git clone git@github.com:твой_логин/твой_репозиторий.git && cd habits-tracker
-#
-#          git pull origin main
-#
-#          echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" > .env
-#          echo "SECRET_KEY=$SECRET_KEY" >> .env
-#          echo "DEBUG=False" >> .env
-#          echo "DATABASE_NAME=habits_db" >> .env
-#          echo "DATABASE_USER=habits_user" >> .env
-#          echo "DATABASE_PASSWORD=habits_password" >> .env
-#          echo "DATABASE_HOST=db" >> .env
-#          echo "DATABASE_PORT=5432" >> .env
-#          echo "CELERY_BROKER_URL=redis://redis:6379/0" >> .env
-#          echo "CELERY_RESULT_BACKEND=redis://redis:6379/1" >> .env
-#
-#          docker compose down -v
-#          docker compose up -d --build
-#          EOF
+name: CI/CD to Yandex Cloud
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: "temporary-secret-key-for-tests-only-1234567890"
+      DEBUG: "True"
+      DATABASE_NAME: "test_db"
+      DATABASE_USER: "test_user"
+      DATABASE_PASSWORD: "test_pass"
+      DATABASE_HOST: "localhost"
+      DATABASE_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install dependencies
+        run: poetry install --only main --no-root
+
+      - name: Run tests
+        run: poetry run python manage.py test
+        env:
+          SECRET_KEY: "temporary-secret-key-for-tests-123456789"
+          DEBUG: "True"
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
+
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$SERVER_IP << 'EOF'
+          cd ~/habits-tracker || git clone git@github.com:твой_логин/твой_репозиторий.git && cd habits-tracker
+
+          git pull origin main
+
+          echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" > .env
+          echo "SECRET_KEY=$SECRET_KEY" >> .env
+          echo "DEBUG=False" >> .env
+          echo "DATABASE_NAME=habits_db" >> .env
+          echo "DATABASE_USER=habits_user" >> .env
+          echo "DATABASE_PASSWORD=habits_password" >> .env
+          echo "DATABASE_HOST=db" >> .env
+          echo "DATABASE_PORT=5432" >> .env
+          echo "CELERY_BROKER_URL=redis://redis:6379/0" >> .env
+          echo "CELERY_RESULT_BACKEND=redis://redis:6379/1" >> .env
+
+          docker compose down -v
+          docker compose up -d --build
+          EOF
