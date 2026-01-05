@@ -1,6 +1,6 @@
 name: CI/CD to Yandex Cloud
 
-on: [push]
+on: [ push ]
 
 jobs:
   test:
@@ -39,31 +39,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
       - name: Deploy to server
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
-          echo "$SSH_PRIVATE_KEY" > key.pem
-          chmod 600 key.pem
-
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$SERVER_IP << 'EOF'
-          cd ~/habits-tracker || git clone git@github.com:твой_логин/твой_репозиторий.git && cd habits-tracker
-
+          ssh -o StrictHostKeyChecking=no -vT ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          cd ~/habits_tracker || git clone git@github.com:MrchknRV/habits_tracker.git && cd habits_tracker
           git pull origin main
 
-          echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" > .env
-          echo "SECRET_KEY=$SECRET_KEY" >> .env
-          echo "DEBUG=False" >> .env
-          echo "DATABASE_NAME=habits_db" >> .env
-          echo "DATABASE_USER=habits_user" >> .env
-          echo "DATABASE_PASSWORD=habits_password" >> .env
-          echo "DATABASE_HOST=db" >> .env
-          echo "DATABASE_PORT=5432" >> .env
-          echo "CELERY_BROKER_URL=redis://redis:6379/0" >> .env
-          echo "CELERY_RESULT_BACKEND=redis://redis:6379/1" >> .env
+          cat > .env << ENV
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DEBUG=False
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          DATABASE_NAME=habits_db
+          DATABASE_USER=habits_user
+          DATABASE_PASSWORD=supersecretpassword
+          DATABASE_HOST=db
+          DATABASE_PORT=5432
+          CELERY_BROKER_URL=redis://redis:6379/0
+          CELERY_RESULT_BACKEND=redis://redis:6379/1
+          ENV
 
           docker compose down -v
           docker compose up -d --build
