@@ -1,0 +1,102 @@
+name: CI/CD to Yandex Cloud
+
+on: [ push ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install dependencies
+        run: poetry install --only main --no-root
+
+      - name: Run linting (flake8)
+        run: poetry run flake8 .
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: "temporary-secret-key-for-tests-only-1234567890"
+      DEBUG: "True"
+      DATABASE_NAME: "test_db"
+      DATABASE_USER: "test_user"
+      DATABASE_PASSWORD: "test_pass"
+      DATABASE_HOST: "localhost"
+      DATABASE_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install dependencies
+        run: poetry install --only main --no-root
+
+      - name: Run tests
+        run: poetry run python manage.py test
+        env:
+          SECRET_KEY: "temporary-secret-key-for-tests-123456789"
+          DEBUG: "True"
+
+  build-docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker images
+        run: |
+          docker compose build --no-cache
+
+
+  deploy:
+    needs: build-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no -vT ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          cd ~/habits_tracker || git clone git@github.com:MrchknRV/habits_tracker.git && cd habits_tracker
+          git pull origin main
+
+          cat > .env << ENV
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DEBUG=False
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          DATABASE_NAME=habits_db
+          DATABASE_USER=habits_user
+          DATABASE_PASSWORD=supersecretpassword
+          DATABASE_HOST=db
+          DATABASE_PORT=5432
+          CELERY_BROKER_URL=redis://redis:6379/0
+          CELERY_RESULT_BACKEND=redis://redis:6379/1
+          ENV
+
+          docker compose down -v
+          docker compose up -d --build
+          EOF
