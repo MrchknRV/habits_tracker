@@ -16,9 +16,9 @@ RUN pip install "poetry==$POETRY_VERSION" \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --only main --no-root
 
-RUN poetry run python manage.py collectstatic --noinput
-
 COPY . .
+
+RUN poetry run python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
