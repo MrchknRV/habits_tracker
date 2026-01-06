@@ -18,8 +18,6 @@ RUN pip install "poetry==$POETRY_VERSION" \
 
 COPY . .
 
-RUN poetry run python manage.py collectstatic --noinput
-
 EXPOSE 8000
 
 # Запуск
